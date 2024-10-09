@@ -1,0 +1,2 @@
+# DetectApp
+detecçãodefakenews
