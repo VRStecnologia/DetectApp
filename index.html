@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detect.App</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #1E3A5F;
+            color: #EAEAEA;
+            font-family: Arial, sans-serif;
+            padding: 16px;
+        }
+        .input {
+            width: 80%;
+            height: 40px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            padding: 10px;
+            background-color: #fff;
+        }
+        .button {
+            background-color: #3B82F6;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: #EAEAEA;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .message {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .positive { color: green; }
+        .negative { color: red; }
+        .neutral { color: #EAEAEA; }
+    </style>
+</head>
+<body>
+
+    <h1>Detect.App</h1>
+    <img src="assets/icon.png" alt="Logo" style="width: 100px; height: 100px; margin-bottom: 24px;">
+    
+    <h2>Pesquisa</h2>
+    <input type="text" class="input" id="urlInput" placeholder="Insira a URL">
+    <button class="button" id="searchButton">Pesquisar</button>
+
+    <div id="loading" style="display: none;">Carregando...</div>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('searchButton').onclick = function() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+
+            if (!url) {
+                alert('Por favor, insira uma URL.');
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+            resultDiv.innerHTML = '';
+
+            const apiKey = '893abd71ac6809b9514077562cd060fb';
+            const apiUrl = `https://api.meaningcloud.com/sentiment-2.1?key=${encodeURIComponent(apiKey)}&url=${encodeURIComponent(url)}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    loadingDiv.style.display = 'none';
+                    if (data.score_tag) {
+                        const message = getSentimentMessage(data.score_tag);
+                        resultDiv.innerHTML = `<div class="message ${message.class}">${message.text}</div>`;
+                    }
+                })
+                .catch(error => {
+                    loadingDiv.style.display = 'none';
+                    console.error(error);
+                });
+        };
+
+        function getSentimentMessage(scoreTag) {
+            const tag = scoreTag.toLowerCase();
+            if (tag === 'p+' || tag === 'p') {
+                return { class: 'positive', text: 'Essa notícia não tem predisposição para ser uma fake news.' };
+            } else if (tag === 'n+' || tag === 'n') {
+                return { class: 'negative', text: 'Essa notícia tem predisposição para ser uma fake news.' };
+            } else {
+                return { class: 'neutral', text: 'Essa notícia possui uma predisposição neutra.' };
+            }
+        }
+    </script>
+</body>
+</html>
